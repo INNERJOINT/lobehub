@@ -29,16 +29,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  prepare:
+    name: Prepare build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Select platforms
+        id: matrix
+        env:
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          case "$PLATFORM" in
+            linux/amd64)
+              echo 'matrix={"include":[{"platform":"linux/amd64","os":"ubuntu-latest"}]}' >> "$GITHUB_OUTPUT"
+              ;;
+            linux/arm64)
+              echo 'matrix={"include":[{"platform":"linux/arm64","os":"ubuntu-24.04-arm"}]}' >> "$GITHUB_OUTPUT"
+              ;;
+            linux/amd64,linux/arm64)
+              echo 'matrix={"include":[{"platform":"linux/amd64","os":"ubuntu-latest"},{"platform":"linux/arm64","os":"ubuntu-24.04-arm"}]}' >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported platform: $PLATFORM" >&2
+              exit 1
+              ;;
+          esac
+
   build:
+    needs: prepare
     strategy:
-      matrix:
-        include:
-          - platform: linux/amd64
-            os: ubuntu-latest
-          - platform: linux/arm64
-            os: ubuntu-24.04-arm
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
-    if: contains(inputs.platform, matrix.platform)
     name: Build ${{ matrix.platform }} Image
     steps:
       - name: Prepare
