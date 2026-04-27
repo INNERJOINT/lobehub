@@ -21,6 +21,9 @@ on:
           - linux/arm64
           - linux/amd64,linux/arm64
 
+env:
+  DOCKER_USER: hykinnerjoint
+
 permissions:
   contents: read
 
@@ -55,8 +58,8 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_REGISTRY_USER }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PAT }}
 
       - name: Build and export
         id: build
@@ -65,7 +68,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           context: .
           file: ./Dockerfile
-          outputs: type=image,name=${{ secrets.DOCKER_REGISTRY_USER }}/${{ inputs.image_name }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.DOCKER_USER }}/${{ inputs.image_name }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
@@ -100,13 +103,13 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_REGISTRY_USER }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PAT }}
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
         env:
-          IMAGE_NAME: ${{ secrets.DOCKER_REGISTRY_USER }}/${{ inputs.image_name }}
+          IMAGE_NAME: ${{ env.DOCKER_USER }}/${{ inputs.image_name }}
           IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
           docker buildx imagetools create \
@@ -115,7 +118,7 @@ jobs:
 
       - name: Inspect image
         env:
-          IMAGE_NAME: ${{ secrets.DOCKER_REGISTRY_USER }}/${{ inputs.image_name }}
+          IMAGE_NAME: ${{ env.DOCKER_USER }}/${{ inputs.image_name }}
           IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
           docker buildx imagetools inspect "${IMAGE_NAME}:${IMAGE_TAG}"
