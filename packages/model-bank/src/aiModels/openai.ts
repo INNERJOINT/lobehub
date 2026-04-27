@@ -1392,6 +1392,26 @@ export const openaiSTTModels: AISTTModelCard[] = [
 export const openaiImageModels: AIImageModelCard[] = [
   {
     description:
+      'The latest GPT Image model with superior image quality, enhanced prompt following, and advanced editing capabilities.',
+    displayName: 'GPT Image 2',
+    enabled: true,
+    id: 'gpt-image-2',
+    parameters: gptImage1ParamsSchema,
+    pricing: {
+      approximatePricePerImage: 0.034,
+      units: [
+        { name: 'textInput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput_cacheRead', rate: 1.25, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'imageInput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'imageInput_cacheRead', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'imageOutput', rate: 32, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    releasedAt: '2026-04-24',
+    type: 'image',
+  },
+  {
+    description:
       'An enhanced GPT Image 1 model with 4× faster generation, more precise editing, and improved text rendering.',
     displayName: 'GPT Image 1.5',
     enabled: true,
